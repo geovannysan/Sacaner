@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SecondFragment">
+
+    <android.support.constraint.ConstraintLayout
+
+        android:id="@+id/socketconectado"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <TextView
+            android:id="@+id/textview_second"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@id/button_secondy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.476"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.486" />
+
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/textIpnutCodigo"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="40dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+
+            app:boxCornerRadiusTopEnd="@android:dimen/app_icon_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textview_second"
+            app:layout_constraintVertical_bias="0.15">
+
+            <EditText
+                android:id="@+id/ingreso_codigo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:background="@drawable/edittext_bootstrap"
+                android:hint=""
+                android:inputType="text"
+                android:padding="12dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray_500"
+                android:textSize="16sp" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/button_secondy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="35dp"
+            android:layout_marginEnd="35dp"
+            android:background="@color/design_default_color_primary"
+            android:text="scanear "
+            android:textColor="@color/white"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textIpnutCodigo" />
+
+        <LinearLayout
+            android:id="@+id/PanelMensaje"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toTopOf="@+id/textview_second"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+
+            <TextView
+                android:id="@+id/mensajeCodigo"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text="Codigo ya registrado"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/codigos"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="18dp" />
+
+            <TextView
+                android:id="@+id/tiempocodigo"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="15dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ingrese Código"
+            app:layout_constraintBottom_toTopOf="@+id/textIpnutCodigo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.11"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textview_second"
+            app:layout_constraintVertical_bias="0.893" />
+
+        <Button
+            android:id="@+id/salir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Salir"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@color/red"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_secondy" />
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/layoutConexion"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="6in"
+            android:gravity="center"
+            android:background="@color/cardview_light_background"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="16dp">
+            <TextView
+                android:id="@+id/txtMensaje"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="Esperando conexión con el servidor"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="29sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progresoConexion"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginTop="32dp"
+                app:layout_constraintTop_toBottomOf="@id/txtMensaje"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <Button
+                android:id="@+id/Boton_SalirConxion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SALIR"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/red"
+                android:layout_marginTop="32dp"
+                app:layout_constraintTop_toBottomOf="@id/progresoConexion"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
+</android.support.constraint.ConstraintLayout>
