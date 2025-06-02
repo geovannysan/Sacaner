@@ -44,13 +44,21 @@ public class FirstFragment extends Fragment {
     }
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String port = prefs.getString("puerto","") ;
+        String ip = prefs.getString("ip","") ;
+        binding.ingresopuerto.setText(port);
+        binding.TextIpsocket.setText(ip);
         binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if( binding.TextIpsocket.getText().toString()=="") {
+                if(binding.ingresopuerto.getText().toString().isEmpty()){
                     Toast.makeText(getContext(),"Complete todos los campos",Toast.LENGTH_SHORT).show();
                     return;
+                }
+                if(binding.TextIpsocket.getText().toString().isEmpty()) {
+                    Toast.makeText(getContext(),"Complete todos los campos",Toast.LENGTH_SHORT).show();
+                    return ;
                 }
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
                 SharedPreferences.Editor edit = prefs.edit();
@@ -58,10 +66,25 @@ public class FirstFragment extends Fragment {
                 edit.putString("puerto", binding.ingresopuerto.getText().toString());
                 edit.apply();
 
-                        NavHostFragment.findNavController(FirstFragment.this)
+                NavHostFragment.findNavController(FirstFragment.this)
                         .navigate(R.id.action_FirstFragment_to_SecondFragment);
             }
         });
+      /* binding.ingresopuerto.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
+                // Aquí haces algo, como mover el foco al siguiente campo o validar el puerto
+
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString("ip", binding.TextIpsocket.getText().toString());
+                edit.putString("puerto", binding.ingresopuerto.getText().toString());
+                edit.apply();
+
+                NavHostFragment.findNavController(FirstFragment.this)
+                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
+                return true;
+            }
+            return false;
+        });*/
         binding.btnScanIp.setOnClickListener(new View.OnClickListener(){
             @Override
             public void  onClick(View view){
@@ -77,6 +100,7 @@ public class FirstFragment extends Fragment {
             }
         });
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -107,17 +131,17 @@ public class FirstFragment extends Fragment {
                             e.printStackTrace();
                             Log.d("error",e.getMessage());
                         }
-                       // Toast.makeText(getContext(), "Leído: " + lectura, Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getContext(), "Leído: " + lectura, Toast.LENGTH_SHORT).show();
                         //return;
                     }
                 }
                 String qrResult = data.getStringExtra("com.blikoon.qrcodescanner.error_decoding_image");
 
-              //  String qrResult = data.getStringExtra("qr_result"); // Ajusta el key según el que uses
+                //  String qrResult = data.getStringExtra("qr_result"); // Ajusta el key según el que uses
                 if (qrResult != null) {
                     // Procesar el resultado del QR
-                   // Gson gson = new Gson();
-                   // DatosSocket datosRecibidos = gson.fromJson(qrResult, DatosSocket.class);
+                    // Gson gson = new Gson();
+                    // DatosSocket datosRecibidos = gson.fromJson(qrResult, DatosSocket.class);
                     //binding.TextIpsocket.setText(datosRecibidos.getCampo1());
                     Toast.makeText(getContext(), "Resultado: " + qrResult, Toast.LENGTH_SHORT).show();
                 } else {

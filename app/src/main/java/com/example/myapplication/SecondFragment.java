@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -14,6 +16,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -30,12 +33,18 @@ import android.widget.Toast;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
+import com.example.myapplication.Infraestructura.DeviceIdManager;
 import com.example.myapplication.Infraestructura.MyWebSocketClient;
 import com.example.myapplication.databinding.FragmentSecondBinding;
+import com.google.zxing.ResultPoint;
+import com.journeyapps.barcodescanner.BarcodeCallback;
+import com.journeyapps.barcodescanner.BarcodeResult;
+import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,63 +55,87 @@ public class SecondFragment extends Fragment {
     private FragmentSecondBinding binding;
     private  ConstraintLayout layou;
     private Handler reconnectHandler = new Handler();
-    private int retryDelay = 5000;
+    private int retryDelay = 3000;
     private MyWebSocketClient socketClient;
     private Handler reconnectHandle = new Handler(Looper.getMainLooper());
     private int reconnectAttempts = 0;
     private final int MAX_RECONNECT_ATTEMPTS = 10;
     private final int RECONNECT_DELAY_MS = 5000; // 5 segundos
     private boolean usuarioSalioManualmente = false;
+    private  boolean Conectaado = true;
+    private DecoratedBarcodeView barcodeView;
+    private static final int REQUEST_CAMERA_PERMISSION = 101;
+    private MediaPlayer mediaPlayer;
+    private  MediaPlayer fallidoPlayer;
+    private int[] sounds = {R.raw.store};
+    private int[] failde = {R.raw.failed};
+    private int sound;
+    private  String codigoPendiente;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {binding = FragmentSecondBinding.inflate(inflater, container, false);return binding.getRoot();}
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {binding = FragmentSecondBinding.inflate(inflater, container, false);return binding.getRoot();
 
+    }
+    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-      //  final MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.store);
+        //  final MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.store);
         //final MediaPlayer mediaPlayerfile = MediaPlayer.create(getContext(), R.raw.failed);
-
-
-        // return binding.getRoot();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         String ip =  prefs.getString("ip", "Default");  // O usa la IP de tu dispositivo
         String port = prefs.getString("puerto","Default");
-        String clientId = getDeviceId();
-        Log.d("Puertos",port);
-        socketClient = new MyWebSocketClient(ip, port, clientId, new MyWebSocketClient.WebSocketMessageListener() {
+
+
+        String uniqueId = DeviceIdManager.getUniqueID(getContext());
+        barcodeView = view.findViewById(R.id.barcode_scanner);
+        mediaPlayer = MediaPlayer.create(getContext(), sounds[0]);
+        fallidoPlayer = MediaPlayer.create(getContext(),failde[0]);
+        //mediaPlayer.setOnCompletionListener();
+
+
+        socketClient = new MyWebSocketClient(ip, port, uniqueId, new MyWebSocketClient.WebSocketMessageListener() {
             @SuppressLint("ResourceAsColor")
             @Override
             public void onMessageReceived(final String message) {
                 Activity activity = getActivity();
                 if (activity != null) {
                     activity.runOnUiThread(() -> {
-                    String lectura = message;
-                    if (lectura.startsWith("\"") && lectura.endsWith("\"")) {
-                        lectura = lectura.substring(1, lectura.length() - 1);
-                    }
-                    lectura = lectura.replace("\\", "");
-                    try {
-                        JSONObject jo = new JSONObject(lectura);
-                        if (jo.getString("Type").equals("Error")) {
-                            binding.PanelMensaje.setBackgroundColor(ContextCompat.getColor(activity, R.color.red));
-                            //mediaPlayerfile.start();
-                        } else {
-                            binding.PanelMensaje.setBackgroundColor(ContextCompat.getColor(activity, R.color.grreen));
-                            //mediaPlayer.start();
+                        String lectura = message;
+                        if (lectura.startsWith("\"") && lectura.endsWith("\"")) {
+                            lectura = lectura.substring(1, lectura.length() - 1);
                         }
+                        lectura = lectura.replace("\\", "");
+                        try {
+                            JSONObject jo = new JSONObject(lectura);
+                            if (jo.getString("Type").equals("Error")) {
+                                binding.PanelMensaje.setBackgroundColor(ContextCompat.getColor(activity, R.color.red));
+                                fallidoPlayer.start();
 
-                        String[] parts = jo.getString("Codigo").split("-");
-                        System.out.println(jo.getString("Codigo"));
-                        String part1 = parts.length > 0 ? parts[0] : jo.getString("Codigo");
-                        String part2 = parts.length > 1 ? parts[1] : "";
-                        binding.mensajeCodigo.setText(decodeUnicode(part1));
-                        binding.tiempocodigo.setText(decodeUnicode(part2));
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
+                            } else {
+                                binding.PanelMensaje.setBackgroundColor(ContextCompat.getColor(activity, R.color.grreen));
+                                mediaPlayer.start();
+                                reconnectHandle.postDelayed(()->{
+                                    mediaPlayer.stop();
+                                },retryDelay);
+
+                            }
+                            String[] parts = jo.getString("Codigo").split("-");
+                            System.out.println(jo.getString("Codigo"));
+                            String part1 = parts.length > 0 ? parts[0] : jo.getString("Codigo");
+                            String part2 = parts.length > 1 ? parts[1] : "";
+                            binding.mensajeCodigo.setText(decodeUnicode(part1));
+                            binding.tiempocodigo.setText(decodeUnicode(part2));
+                            reconnectHandle.postDelayed(() -> {
+                                mediaPlayer.pause();
+                                mediaPlayer.seekTo(0);
+                            }, retryDelay);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
             }
             @Override
@@ -112,6 +145,7 @@ public class SecondFragment extends Fragment {
                     binding.socketconectado.setVisibility(View.VISIBLE);
                     binding.layoutConexion.setVisibility(View.GONE);
                     binding.mensajeCodigo.setText("");
+                    onSocketConnected();
                 });
             }
             @Override
@@ -121,37 +155,59 @@ public class SecondFragment extends Fragment {
             }
             @Override
             public void onError(String error) {
-                Log.d("Desonectado","⚠️ Desconectado del servidor error  "+error);
-                attemptReconnection();
+                if (error.contains("403")) {
+                    requireActivity().runOnUiThread(()->{
+                        Toast.makeText(getContext(),"Conexión Rechazado",Toast.LENGTH_LONG).show();
+                        reconnectHandle.postDelayed(()->{
+
+                            socketClient.stop();
+                            NavHostFragment.findNavController(SecondFragment.this)
+                                    .navigate(R.id.action_SecondFragment_to_FirstFragment);
+                            onDestroyView();
+                        },RECONNECT_DELAY_MS);
+                    });
+                    Log.e("WebSocket", "❌ Acceso prohibido al WebSocket (403). Verifica autenticación o permisos.");
+                    // Mostrar mensaje al usuario o abortar reconexión
+                } else {
+                    Log.w("WebSocket", "⚠️ Error de conexión: " + error);
+                    attemptReconnection();
+                }
             }
         });
 
         socketClient.start();
-        binding.buttonSecondy.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    // Solicitar permiso
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CODE_QR_SCAN);
-                } else {
-                    // Permiso ya concedido, iniciar actividad
-                    Intent i = new Intent(getActivity(), QrCodeActivity.class);
-                    startActivityForResult(i, REQUEST_CODE_QR_SCAN);
-                }
-                /*NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);*/
+        barcodeView.setVisibility(View.GONE); // Ocultar al inicio
+        barcodeView.pause();
+        //binding.layoutConexion.setVisibility(View.VISIBLE);
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else {
+            barcodeView.resume();
+        }
+
+        binding.buttonSecondy.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+            } else {
+                binding.layoutConexion.setVisibility(View.GONE);
+                barcodeView.setVisibility(View.VISIBLE);
+                barcodeView.resume();
             }
         });
+
+
         binding.BotonSalirConxion.setOnClickListener(new  View.OnClickListener(){
-              @Override
-              public void onClick(View v) {
-                  socketClient.stop();
-                  NavHostFragment.findNavController(SecondFragment.this)
-                          .navigate(R.id.action_SecondFragment_to_FirstFragment);
-                  onDestroyView();
-              }
-          });
+            @Override
+            public void onClick(View v) {
+                socketClient.stop();
+                NavHostFragment.findNavController(SecondFragment.this)
+                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
+                // onDestroyView();
+            }
+        });
         binding.salir.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,67 +223,64 @@ public class SecondFragment extends Fragment {
                 if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
                     Toast.makeText(getContext(), "Enter"+binding.ingresoCodigo.getText(), Toast.LENGTH_SHORT).show();
                     String message = binding.ingresoCodigo.getText().toString().trim();
-                   String envios = "{ \"Type\": \"\", \"Codigo\": \"" + message + "\" }";
+
                     if (!message.isEmpty()) {
                         binding.codigos.setText(message);
-                        socketClient.sendMessage(envios);
+                        socketClient.sendMessage(message);
                         binding.ingresoCodigo.setText("");
                     }
-                    return true; // Evento manejado
+                    return true;
                 }
-                return false; // Evento no manejado
+                return false;
             }
         });
-           /*  sendButton.setOnClickListener(v -> {
-            String message = editText.getText().toString();
-            MessageSocket messageSocket = new MessageSocket();
-            messageSocket.setType("chat");
-            messageSocket.setContent(message);
+        barcodeView.decodeContinuous(new BarcodeCallback() {
+            @Override
+            public void barcodeResult(BarcodeResult result) {
+                //barcodeView.pause(); // pausa luego de escanear
+                //Toast.makeText(getContext(), "Código: " + result.getText(), Toast.LENGTH_SHORT).show();
 
-            // Enviar el mensaje al servidor
-            socketClient.sendMessageToServer(messageSocket);
-        });*/
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE_QR_SCAN) {
-            if (resultCode == Activity.RESULT_OK ) {
-                if (requestCode == REQUEST_CODE_QR_SCAN) {
-                    if (data != null) {
-                        try {
-                        String lectura = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
-                            socketClient.sendMessage(lectura);
-                            //binding.TextIpsocket.setText(jo
-                            return;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Log.d("error",e.getMessage());
-                        }
-                        // Toast.makeText(getContext(), "Leído: " + lectura, Toast.LENGTH_SHORT).show();
-                        //return;
-                    }
+                binding.barcodeScanner.setVisibility(View.GONE);
+                if (Conectaado) {
+                    binding.codigos.setText(result.getText());
+                    // Si ya conectado, enviamos inmediatamente
+                    socketClient.sendMessage(result.getText());
+                    return;
                 }
-                String qrResult = data.getStringExtra("com.blikoon.qrcodescanner.error_decoding_image");
-
-                //  String qrResult = data.getStringExtra("qr_result"); // Ajusta el key según el que uses
-                if (qrResult != null) {
-                    // Procesar el resultado del QR
-                    // Gson gson = new Gson();
-                    // DatosSocket datosRecibidos = gson.fromJson(qrResult, DatosSocket.class);
-                    //binding.TextIpsocket.setText(datosRecibidos.getCampo1());
-                    Toast.makeText(getContext(), "Resultado: " + qrResult, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "No se pudo obtener el resultado del escaneo" + qrResult, Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                // Usuario canceló el escaneo (por ejemplo, presionó atrás)
-                Toast.makeText(getContext(), "Escaneo cancelado", Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void possibleResultPoints(List<ResultPoint> resultPoints) {}
+        });
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Bienvenido")
+                        .setMessage("Conexión Completa.")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                barcodeView.pause();
+                                //Toast.makeText(SecondFragment.this, "OK presionado", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.CAMERA},
+                    REQUEST_CODE_QR_SCAN);
+        } else {
+            //startScanner();
         }
 
+
     }
+
+
     // Método para decodificar \u00ED a í
     public static String decodeUnicode(String input) {
         StringBuilder sb = new StringBuilder();
@@ -242,6 +295,18 @@ public class SecondFragment extends Fragment {
         }
         sb.append(input.substring(last));
         return sb.toString();
+    }
+    public void onSocketConnected() {
+        Conectaado = true;
+        // Si hay código pendiente, se envía ahora
+        if (codigoPendiente != null) {
+            socketClient.sendMessage(codigoPendiente);
+            Toast.makeText(getContext(),codigoPendiente,Toast.LENGTH_SHORT).show();
+            codigoPendiente = null;  // Limpiar la variable
+        }
+    }
+    public void callParentMethod(){
+        getActivity().onBackPressed();
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -259,9 +324,11 @@ public class SecondFragment extends Fragment {
     private void attemptReconnection() {
         if (usuarioSalioManualmente|| !isAdded() || binding == null) {
             Log.d("WebSocket", "🚫 Reconexión cancelada por el usuario.");
+            socketClient.stop();
             return;
         }
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+            socketClient.stop();
             Log.d("WebSocket", "❌ Reintentos agotados");
             NavHostFragment.findNavController(SecondFragment.this)
                     .navigate(R.id.action_SecondFragment_to_FirstFragment);
@@ -277,42 +344,7 @@ public class SecondFragment extends Fragment {
             socketClient.start();
         }, RECONNECT_DELAY_MS);
     }
-    public static String getDeviceId()
-    {
-        String serial = null;
 
-        String m_szDevIDShort = "35" +
-                Build.BOARD.length() % 10 + Build.BRAND.length() % 10 +
-                Build.CPU_ABI.length() % 10 + Build.DEVICE.length() % 10 +
-                Build.DISPLAY.length() % 10 + Build.HOST.length() % 10 +
-                Build.ID.length() % 10 + Build.MANUFACTURER.length() % 10 +
-                Build.MODEL.length() % 10 + Build.PRODUCT.length() % 10 +
-                Build.TAGS.length() % 10 + Build.TYPE.length() % 10 +
-                Build.USER.length() % 10; //13 bits
 
-        try
-        {
-
-            //API>=9 use serial number
-            Log.d("UID",new UUID(m_szDevIDShort.hashCode(), serial.hashCode()).toString());
-            return new UUID(m_szDevIDShort.hashCode(), serial.hashCode()).toString();
-        }
-        catch (Exception exception)
-        {
-            //serial needs an initialization
-            serial = "serial"; // Any initialization
-        }
-
-        //15-digit number pieced together using hardware information
-        return new UUID(m_szDevIDShort.hashCode(), serial.hashCode()).toString();
-    }
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-        if (socketClient != null) {
-            socketClient.stop();
-        }
-    }
 
 }
