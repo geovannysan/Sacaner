@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.tickets.myapplication;
 
 import org.junit.Test;
 

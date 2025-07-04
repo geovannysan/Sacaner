@@ -1,4 +1,4 @@
-package com.example.myapplication.Infraestructura;
+package com.tickets.myapplication.Infraestructura;
 
 import android.os.Build;
 import android.provider.Settings;
@@ -9,6 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+
 
 public class MyWebSocketClient {
 
@@ -96,7 +97,9 @@ public interface WebSocketMessageListener {
     }
     public void sendMessage(String message) {
         if (webSocket != null) {
-            webSocket.send(message);
+            String json = String.format("{\"Type\": \"\", \"Codigo\": \"%s\"}", message);
+            Log.d("Nuevos",json);
+            webSocket.send(json);
         } else {
             Log.e("WebSocket", "WebSocket no está conectado");
         }

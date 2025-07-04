@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.tickets.myapplication;
 
 import android.Manifest;
 import android.app.Activity;
@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,14 +15,14 @@ import android.view.ViewGroup;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
-import com.example.myapplication.Dominio.DatosSocket;
+import com.example.myapplication.R;
 import com.example.myapplication.databinding.FragmentFirstBinding;
-import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,21 +69,6 @@ public class FirstFragment extends Fragment {
                         .navigate(R.id.action_FirstFragment_to_SecondFragment);
             }
         });
-      /* binding.ingresopuerto.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
-                // Aquí haces algo, como mover el foco al siguiente campo o validar el puerto
-
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString("ip", binding.TextIpsocket.getText().toString());
-                edit.putString("puerto", binding.ingresopuerto.getText().toString());
-                edit.apply();
-
-                NavHostFragment.findNavController(FirstFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
-                return true;
-            }
-            return false;
-        });*/
         binding.btnScanIp.setOnClickListener(new View.OnClickListener(){
             @Override
             public void  onClick(View view){
@@ -99,12 +83,19 @@ public class FirstFragment extends Fragment {
                 }
             }
         });
+        binding.ticketsOline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity().getApplicationContext(), "Tree",Toast.LENGTH_SHORT).show();
+                NavHostFragment.findNavController(FirstFragment.this)
+                        .navigate(R.id.action_FirstFragment_to_fragment_three);
+            }
+        });
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == REQUEST_CODE_QR_SCAN) {
             if (resultCode == Activity.RESULT_OK ) {
                 if (requestCode == REQUEST_CODE_QR_SCAN) {
@@ -116,7 +107,7 @@ public class FirstFragment extends Fragment {
                                 lectura = lectura.substring(1, lectura.length() - 1);
                             }
 
-                            // Reemplaza los caracteres escapados
+
                             lectura = lectura.replace("\\", "");
 
                             JSONObject jo = new JSONObject(lectura);
@@ -124,15 +115,11 @@ public class FirstFragment extends Fragment {
                             binding.ingresopuerto.setText(jo.getString("puerto"));
                             Toast.makeText(getContext(), "Leído: " , Toast.LENGTH_SHORT).show();
 
-                            //JSONObject jo = new JSONObject(lectura);
-                            //Toast.makeText(getContext(), "Leído: " + jo.getString("ip"), Toast.LENGTH_SHORT).show();
-                            return;
+                                return;
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.d("error",e.getMessage());
                         }
-                        // Toast.makeText(getContext(), "Leído: " + lectura, Toast.LENGTH_SHORT).show();
-                        //return;
                     }
                 }
                 String qrResult = data.getStringExtra("com.blikoon.qrcodescanner.error_decoding_image");

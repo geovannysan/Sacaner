@@ -1,4 +1,4 @@
-package com.example.myapplication.Dominio;
+package com.tickets.myapplication.Dominio;
 
 public class DatosSocket {
     private String ip;

@@ -1,9 +1,10 @@
-package com.example.myapplication;
+package com.tickets.myapplication;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,10 +12,12 @@ import android.view.View;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.myapplication.Infraestructura.MyWebSocketClient;
+import com.blikoon.qrcodescanner.QrCodeActivity;
+import com.example.myapplication.R;
 import com.example.myapplication.databinding.ActivityMainBinding;
 
 import android.view.Menu;
@@ -24,11 +27,12 @@ import android.widget.Toast;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-
+    private static final int REQUEST_CODE_QR_SCAN = 100;
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.SplashTheme);
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -48,9 +52,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
     }
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -60,35 +63,6 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
-    public static String getDeviceId()
-    {
-        String serial = null;
-
-        String m_szDevIDShort = "35" +
-                Build.BOARD.length() % 10 + Build.BRAND.length() % 10 +
-                Build.CPU_ABI.length() % 10 + Build.DEVICE.length() % 10 +
-                Build.DISPLAY.length() % 10 + Build.HOST.length() % 10 +
-                Build.ID.length() % 10 + Build.MANUFACTURER.length() % 10 +
-                Build.MODEL.length() % 10 + Build.PRODUCT.length() % 10 +
-                Build.TAGS.length() % 10 + Build.TYPE.length() % 10 +
-                Build.USER.length() % 10; //13 bits
-
-        try
-        {
-
-            //API>=9 use serial number
-            Log.d("UID",new UUID(m_szDevIDShort.hashCode(), serial.hashCode()).toString());
-            return new UUID(m_szDevIDShort.hashCode(), serial.hashCode()).toString();
-        }
-        catch (Exception exception)
-        {
-            //serial needs an initialization
-            serial = "serial"; // Any initialization
-        }
-
-        //15-digit number pieced together using hardware information
-        return new UUID(m_szDevIDShort.hashCode(), serial.hashCode()).toString();
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -103,6 +77,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_QR_SCAN) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permiso concedido, iniciar actividad
+                Intent i = new Intent(getApplicationContext(), QrCodeActivity.class);
+                startActivityForResult(i, REQUEST_CODE_QR_SCAN);
+            } else {
+                Toast.makeText(getApplicationContext(), "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
     @Override
     public void onBackPressed (){

@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SecondFragment">
+    tools:context="com.tickets.myapplication.SecondFragment">
+
 
     <android.support.constraint.ConstraintLayout
 
         android:id="@+id/socketconectado"
-        android:layout_width="match_parent"
+        android:layout_width="409dp"
         android:layout_height="match_parent"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -24,7 +25,7 @@
             android:id="@+id/textview_second"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/button_secondy"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.476"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,53 +33,44 @@
             app:layout_constraintVertical_bias="0.486" />
 
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/textIpnutCodigo"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="40dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-
-            app:boxCornerRadiusTopEnd="@android:dimen/app_icon_size"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textview_second"
-            app:layout_constraintVertical_bias="0.15">
-
-            <EditText
-                android:id="@+id/ingreso_codigo"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:background="@drawable/edittext_bootstrap"
-                android:hint=""
-                android:inputType="text"
-                android:padding="12dp"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:textColorHint="@color/gray_500"
-                android:textSize="16sp" />
-        </android.support.design.widget.TextInputLayout>
-
-        <Button
-            android:id="@+id/button_secondy"
+        <RelativeLayout
+            android:id="@+id/relativeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="35dp"
-            android:layout_marginEnd="35dp"
-            android:background="@color/design_default_color_primary"
-            android:text="scanear "
-            android:textColor="@color/white"
-
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textIpnutCodigo" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.499"
+            tools:layout_editor_absoluteX="-16dp">
+
+            <Button
+                android:id="@+id/button_secondy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="35dp"
+                android:layout_marginEnd="35dp"
+                android:background="@color/design_default_color_primary"
+                android:text="scanear "
+
+                android:textColor="@color/white"
+
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/salir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/red"
+                android:text="Salir"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/PanelMensaje"
@@ -98,13 +90,14 @@
                 android:id="@+id/mensajeCodigo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Codigo ya registrado"
-                android:textAlignment="center"
-                android:textColor="@color/white"
-                android:textSize="20sp"
+                android:ellipsize="end"
                 android:gravity="center"
                 android:maxLines="3"
-                android:ellipsize="end" />
+                android:text="Codigo ya registrado"
+                android:textAlignment="center"
+
+                android:textColor="@color/white"
+                android:textSize="20sp" />
 
 
             <TextView
@@ -138,17 +131,39 @@
             app:layout_constraintTop_toBottomOf="@+id/textview_second"
             app:layout_constraintVertical_bias="0.893" />
 
-        <Button
-            android:id="@+id/salir"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/red"
-            android:text="Salir"
-            android:textColor="@color/white"
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/textIpnutCodigo"
+            android:layout_width="409dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="40dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+
+            app:boxCornerRadiusTopEnd="@android:dimen/app_icon_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_secondy" />
+            app:layout_constraintTop_toTopOf="@+id/textview_second"
+            app:layout_constraintVertical_bias="0.15">
+
+            <EditText
+                android:id="@+id/ingresoCodigo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:background="@drawable/edittext_bootstrap"
+                android:hint=""
+                android:inputType="text"
+                android:padding="12dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray_500"
+                android:textSize="16sp"
+                />
+        </android.support.design.widget.TextInputLayout>
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
@@ -158,9 +173,9 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:paddingTop="55dp"
         app:layout_constraintVertical_bias="0.0">
 
 
@@ -171,10 +186,13 @@
             android:background="@color/cardview_light_background"
             android:gravity="center"
             android:orientation="vertical"
+            android:paddingTop="55dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0">
 
 
             <TextView
@@ -220,8 +238,44 @@
         android:id="@+id/barcode_scanner"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="12dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/cerrar_scaner"
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:layout_marginBottom="28dp"
+                android:verticalScrollbarPosition="right"
+                android:background="@color/colorPrimary"
+                android:text="Cerrar"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </com.journeyapps.barcodescanner.DecoratedBarcodeView>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbarv2"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:titleTextColor="@color/black"
+        app:subtitleTextColor="@color/white"
+
+        app:layout_constraintTop_toTopOf="parent">
+
+    </android.support.v7.widget.Toolbar>
 </android.support.constraint.ConstraintLayout>

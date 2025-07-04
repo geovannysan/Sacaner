@@ -1,41 +1,46 @@
-package com.example.myapplication;
+package com.tickets.myapplication;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.content.res.AppCompatResources;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.view.inputmethod.EditorInfo;
-import android.widget.LinearLayout;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
-import com.example.myapplication.Infraestructura.DeviceIdManager;
-import com.example.myapplication.Infraestructura.MyWebSocketClient;
 import com.example.myapplication.databinding.FragmentSecondBinding;
+import com.tickets.myapplication.Infraestructura.DeviceIdManager;
+import com.tickets.myapplication.Infraestructura.MyWebSocketClient;
+import com.example.myapplication.R;
+
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
@@ -45,7 +50,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,7 +77,9 @@ public class SecondFragment extends Fragment {
     private  String codigoPendiente;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {binding = FragmentSecondBinding.inflate(inflater, container, false);return binding.getRoot();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
+        binding = FragmentSecondBinding.inflate(inflater, container, false);
+        return binding.getRoot();
 
     }
     @Override
@@ -85,9 +91,20 @@ public class SecondFragment extends Fragment {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         String ip =  prefs.getString("ip", "Default");  // O usa la IP de tu dispositivo
         String port = prefs.getString("puerto","Default");
-
-
         String uniqueId = DeviceIdManager.getUniqueID(getContext());
+        Toolbar toolbar = view.findViewById(R.id.toolbarv2);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.setSupportActionBar(toolbar);
+
+        if (activity.getSupportActionBar() != null) {
+            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true); // muestra botón atrás
+            activity.getSupportActionBar().setDisplayShowHomeEnabled(true);
+            String firstPart = uniqueId.split("-")[0];
+            activity.getSupportActionBar().setTitle("ID Disp."+firstPart);
+
+        }
+        setHasOptionsMenu(true);
+
         barcodeView = view.findViewById(R.id.barcode_scanner);
         mediaPlayer = MediaPlayer.create(getContext(), sounds[0]);
         fallidoPlayer = MediaPlayer.create(getContext(),failde[0]);
@@ -101,6 +118,8 @@ public class SecondFragment extends Fragment {
                 Activity activity = getActivity();
                 if (activity != null) {
                     activity.runOnUiThread(() -> {
+                        barcodeView.pause();
+                        binding.ingresoCodigo.requestFocus();
                         String lectura = message;
                         if (lectura.startsWith("\"") && lectura.endsWith("\"")) {
                             lectura = lectura.substring(1, lectura.length() - 1);
@@ -141,7 +160,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void onConnected() {
                 requireActivity().runOnUiThread(() -> {
-                    Log.d("Conectado", "✅ Conectado al servidor");
+                   // Log.d("Conectado", "✅ Conectado al servidor");
                     binding.socketconectado.setVisibility(View.VISIBLE);
                     binding.layoutConexion.setVisibility(View.GONE);
                     binding.mensajeCodigo.setText("");
@@ -150,7 +169,7 @@ public class SecondFragment extends Fragment {
             }
             @Override
             public void onDisconnected() {
-                Log.d("Desonectado","⚠️ Desconectado del servidor");
+            //    Log.d("Desonectado","⚠️ Desconectado del servidor");
                 attemptReconnection();
             }
             @Override
@@ -166,20 +185,18 @@ public class SecondFragment extends Fragment {
                             onDestroyView();
                         },RECONNECT_DELAY_MS);
                     });
-                    Log.e("WebSocket", "❌ Acceso prohibido al WebSocket (403). Verifica autenticación o permisos.");
+                    //Log.e("WebSocket", "❌ Acceso prohibido al WebSocket (403). Verifica autenticación o permisos.");
                     // Mostrar mensaje al usuario o abortar reconexión
                 } else {
-                    Log.w("WebSocket", "⚠️ Error de conexión: " + error);
+                    //Log.w("WebSocket", "⚠️ Error de conexión: " + error);
                     attemptReconnection();
                 }
             }
         });
-
+        binding.ingresoCodigo.requestFocus();
         socketClient.start();
         barcodeView.setVisibility(View.GONE); // Ocultar al inicio
-        barcodeView.pause();
-        //binding.layoutConexion.setVisibility(View.VISIBLE);
-
+       // barcodeView.pause();
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
@@ -217,33 +234,33 @@ public class SecondFragment extends Fragment {
                 onDestroyView();
             }
         });
-        binding.ingresoCodigo.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                    Toast.makeText(getContext(), "Enter"+binding.ingresoCodigo.getText(), Toast.LENGTH_SHORT).show();
-                    String message = binding.ingresoCodigo.getText().toString().trim();
+        binding.ingresoCodigo.setOnEditorActionListener((v, actionId, event) -> {
+            Toast.makeText(getContext(),"Enter",Toast.LENGTH_SHORT).show();
 
-                    if (!message.isEmpty()) {
-                        binding.codigos.setText(message);
-                        socketClient.sendMessage(message);
-                        binding.ingresoCodigo.setText("");
-                    }
-                    return true;
+          //  if (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER ) {
+                Toast.makeText(getContext(),"",Toast.LENGTH_SHORT).show();
+                String message = binding.ingresoCodigo.getText().toString().trim();
+                if (!message.isEmpty()) {
+                    binding.codigos.setText(message);
+                    socketClient.sendMessage(message);
+                    binding.ingresoCodigo.setText("");
                 }
-                return false;
-            }
+                binding.ingresoCodigo.requestFocus();
+               return true;
+           // }
+           // return false;
         });
+
+
         barcodeView.decodeContinuous(new BarcodeCallback() {
             @Override
             public void barcodeResult(BarcodeResult result) {
-                //barcodeView.pause(); // pausa luego de escanear
+               barcodeView.pause();
                 //Toast.makeText(getContext(), "Código: " + result.getText(), Toast.LENGTH_SHORT).show();
-
+                binding.ingresoCodigo.requestFocus();
                 binding.barcodeScanner.setVisibility(View.GONE);
                 if (Conectaado) {
                     binding.codigos.setText(result.getText());
-                    // Si ya conectado, enviamos inmediatamente
                     socketClient.sendMessage(result.getText());
                     return;
                 }
@@ -252,7 +269,15 @@ public class SecondFragment extends Fragment {
             @Override
             public void possibleResultPoints(List<ResultPoint> resultPoints) {}
         });
-        new Handler().post(new Runnable() {
+        binding.cerrarScaner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                barcodeView.setVisibility(View.GONE);
+                barcodeView.pause();
+                binding.socketconectado.setVisibility(View.VISIBLE);
+            }
+        });
+       new Handler().post(new Runnable() {
             @Override
             public void run() {
                 new AlertDialog.Builder(getContext())
@@ -279,9 +304,6 @@ public class SecondFragment extends Fragment {
 
 
     }
-
-
-    // Método para decodificar \u00ED a í
     public static String decodeUnicode(String input) {
         StringBuilder sb = new StringBuilder();
         Pattern pattern = Pattern.compile("\\\\u([0-9A-Fa-f]{4})");
@@ -321,22 +343,48 @@ public class SecondFragment extends Fragment {
             }
         }
     }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Aquí haces lo que quieras al presionar el botón atrás del toolbar
+            //Toast.makeText(getContext(), "Atrás presionado", Toast.LENGTH_SHORT).show();
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("¿Salir?")
+                    .setMessage("¿Estás seguro de que deseas regresar?")
+                    .setPositiveButton("Sí", (dialog, which) -> {
+                        requireActivity().getSupportFragmentManager().popBackStack();
+                        socketClient.stop();
+                        barcodeView.pause();
+
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+            binding.ingresoCodigo.requestFocus();
+            return true;
+            // Ejemplo: volver al fragmento anterior
+            //requireActivity().getSupportFragmentManager().popBackStack();
+
+            //return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void attemptReconnection() {
         if (usuarioSalioManualmente|| !isAdded() || binding == null) {
-            Log.d("WebSocket", "🚫 Reconexión cancelada por el usuario.");
+            //Log.d("WebSocket", "🚫 Reconexión cancelada por el usuario.");
             socketClient.stop();
             return;
         }
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
             socketClient.stop();
-            Log.d("WebSocket", "❌ Reintentos agotados");
+            //Log.d("WebSocket", "❌ Reintentos agotados");
             NavHostFragment.findNavController(SecondFragment.this)
                     .navigate(R.id.action_SecondFragment_to_FirstFragment);
             return;
         }
 
         reconnectHandler.postDelayed(() -> {
-            Log.d("WebSocket", "🔄 Reintentando conexión... intento #" + (reconnectAttempts + 1));
+            //Log.d("WebSocket", "🔄 Reintentando conexión... intento #" + (reconnectAttempts + 1));
             binding.layoutConexion.setVisibility(View.VISIBLE);
             binding.socketconectado.setVisibility(View.GONE);
             binding.mensajeCodigo.setText("Esperando Conexión del Servidor");

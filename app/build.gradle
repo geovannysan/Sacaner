@@ -7,12 +7,12 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.example.myapplication"
+        applicationId 'com.tickets.myapplication'
         minSdk 17
         targetSdk 32
         versionCode 1
         versionName "1.0"
-
+        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,6 +39,9 @@ dependencies {
     implementation 'android.arch.navigation:navigation-ui:1.0.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation('com.squareup.retrofit2:retrofit:2.9.0') {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
 
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
     implementation 'com.google.code.gson:gson:2.8.5'
